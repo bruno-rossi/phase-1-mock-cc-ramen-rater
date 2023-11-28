@@ -1,16 +1,12 @@
-// Core Deliverables:
-// See all ramen images in the div with the id of ramen-menu. When the page loads, request the data from the server to get all the ramen objects. Then, display the image for each of the ramen using an img tag inside the #ramen-menu div.
-// Click on an image from the #ramen-menu div and see all the info about that ramen displayed inside the #ramen-detail div and where it says insert comment here and insert rating here.
-// Create a new ramen after submitting the new-ramen form. The new ramen should be added to the#ramen-menu div. The new ramen does not need to persist; in other words, if you refresh the page, it's okay that the new ramen is no longer on the page.
-
 // ## Deliverable 1:
-// We need to get the images from the db and populate it into the menu element.
-// GET data from "http://localhost:3000/ramens" with a fetch request
-// Write a function to create a ramen in the <div id="ramen-menu"> element.
-// a. Execute the function for each element in the dataset.
+// As a user, I would like to see the ramen images from the db populated as menu elements.
+// Steps:
+// 1. GET data from "http://localhost:3000/ramens" with a fetch request.
+// 2. Write a function to create a ramen in the <div id="ramen-menu"> element.
+// 3. Execute the function for each element in the dataset.
 
 // ## Deliverable 2:
-// When a user clicks on an image in the ramen menu div, the details of that ramen get populated as textContent in the <div id="ramen-detail"> and following elements:
+// As a user, when I click on an image in the ramen menu div, I would like to see the details of that ramen populated in the <div id="ramen-detail"> and following elements:
 // Steps: 
 // 1. Add a click event listener to the imgTag.
 // 2. Inside the event listener, querySelector each of the following elements and set their attributes or textContent as specified:
@@ -34,10 +30,24 @@
 // - <input type="number" name="rating" id="new-rating" />'s value ===> object.rating;
 // - <textarea name="new-comment" id="new-comment"></textarea>'s value ====> object.comment;
 
+// ## Advanced Deliverable 1:
+// As a user, I would like to see the details of the first ramen in the db populated as soon as I load the page. 
+// Steps:
+// 1. Write a new function to display details
+// 2. Inside the fetch, before the forEach loop, run the function to display details for ramens[0], which is the first ramen on the list.
+// 3. Refactor the createRamen() function: inside the imgTag event listener, instead of writing the same code as the display details, function, we'll simply call that function and pass the ramen object as an argument.
+
+
+
+let currentRamen;
 
 fetch("http://localhost:3000/ramens")
 .then(response => response.json())
 .then(ramens => {
+    
+    // Run a function to display details for ramens[0] -- the first ramen in the list.
+    displayRamenDetails(ramens[0]);
+    
     ramens.forEach(ramen => {
 
         // Run the function to create a menu item here.
@@ -54,15 +64,33 @@ function createRamen(ramen) {
     ramenMenu.append(imgTag);
 
     imgTag.addEventListener("click", event => {
-        const detailImage = document.querySelector(".detail-image");
-        detailImage.src = ramen.image;
-        detailImage.alt = ramen.name;
+        // const detailImage = document.querySelector(".detail-image");
+        // detailImage.src = ramen.image;
+        // detailImage.alt = ramen.name;
 
-        document.querySelector(".name").textContent = ramen.name;
-        document.querySelector(".restaurant").textContent = ramen.restaurant;
-        document.querySelector("#rating-display").textContent = ramen.rating;
-        document.querySelector("#comment-display").textContent = ramen.comment;
+        // document.querySelector(".name").textContent = ramen.name;
+        // document.querySelector(".restaurant").textContent = ramen.restaurant;
+        // document.querySelector("#rating-display").textContent = ramen.rating;
+        // document.querySelector("#comment-display").textContent = ramen.comment;
+        displayRamenDetails(ramen);
     })
+}
+
+// The function below is created in the scope of Advanced Deliverable 1:
+function displayRamenDetails(ramen) {
+    
+    currentRamen = ramen;
+
+    const detailImage = document.querySelector(".detail-image");
+    detailImage.src = ramen.image;
+    detailImage.alt = ramen.name;
+
+    document.querySelector(".name").textContent = ramen.name;
+    document.querySelector(".restaurant").textContent = ramen.restaurant;
+    document.querySelector("#rating-display").textContent = ramen.rating;
+    document.querySelector("#comment-display").textContent = ramen.comment;
+
+    console.log(currentRamen);
 }
 
 const form = document.querySelector("#new-ramen");
@@ -85,9 +113,37 @@ form.addEventListener("submit", event => {
         rating: newRamenRating,
         comment: newRamenComment
     };
-
-    console.log(newRamen);
     
     createRamen(newRamen);
+    form.reset();
+
+})
+
+// ## Advanced Deliverable 2:
+// As a user, I would like to submit a form to update the rating and comment for a given ramen.
+// Steps:
+// 1. Add the edit form's HTML to the index.html file, below the new ramen form. <form id="edit-ramen">
+// 2. Add a submit event listener to the new form. Remember to prevent default!
+// 3. Define a variable named currentRamen. Inside displayDetails function, assign the ramen argument to currentRamen. This will allow us to save state for any given ramen.
+// 4. Assign the edit form's #new-rating input value to a new variable, updatedRating. 
+// 4. Assign the form's #new-comment value to a new variable, updatedComment.
+// 5. Update currentRamen's rating and comment properties using the new variables.
+
+const editForm = document.querySelector("#edit-ramen");
+
+editForm.addEventListener("submit", event => {
+    event.preventDefault();
+
+    const updatedRating = document.querySelector("#updated-rating").value;
+    const updatedComment = document.querySelector("#updated-comment").value;
+
+    console.log(document.querySelector("#updated-rating").value);
+
+    currentRamen.rating = updatedRating;
+    currentRamen.comment = updatedComment;
+
+    displayRamenDetails(currentRamen);
+
+    editForm.reset();
 
 })
