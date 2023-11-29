@@ -37,25 +37,48 @@
 // 2. Inside the fetch, before the forEach loop, run the function to display details for ramens[0], which is the first ramen on the list.
 // 3. Refactor the createRamen() function: inside the imgTag event listener, instead of writing the same code as the display details, function, we'll simply call that function and pass the ramen object as an argument.
 
+// ## Advanced Deliverable 2:
+// As a user, I would like to submit a form to update the rating and comment for a given ramen.
+// Steps:
+// 1. Add the edit form's HTML to the index.html file, below the new ramen form. <form id="edit-ramen">
+// 2. Add a submit event listener to the new form. Remember to prevent default!
+// 3. Define a variable named currentRamen. Inside displayDetails function, assign the ramen argument to currentRamen. This will allow us to save state for any given ramen.
+// 4. Assign the edit form's #new-rating input value to a new variable, updatedRating. 
+// 4. Assign the form's #new-comment value to a new variable, updatedComment.
+// 5. Update currentRamen's rating and comment properties using the new variables.
 
+// ## Advanced Deliverable 3:
+// Delete a ramen (you can add a "delete" button if you'd like, or use an existing element to handle the delete action). The ramen should be removed from the `ramen-menu` div, and should not be displayed in the `ramen-detail` div. No need to persist.
+// STORY: As a user, I would like to remove a ramen from the list of ramens. After I remove a ramen, I would like to load the first item in the list of ramens.
+// 1. Start by adding a new #remove-ramen button to the ramen details with textContent "Remove".
+// 2. This new button will have a click eventListener that calls a remove() method on the currentRamen.
+// 
 
+// Define a variable currentRamen to save state.
 let currentRamen;
+
+// Define a ramenList variable to store all ramens locally.
+let ramenList;
 
 fetch("http://localhost:3000/ramens")
 .then(response => response.json())
 .then(ramens => {
     
-    // Run a function to display details for ramens[0] -- the first ramen in the list.
+    ramenList = ramens;
+
+    // Run a function to display details for ramens[0] -- the first ramen of the list.
     displayRamenDetails(ramens[0]);
     
     ramens.forEach(ramen => {
 
         // Run the function to create a menu item here.
-        createRamen(ramen);
+        ramenMenuItem(ramen);
     })
 })
 
-function createRamen(ramen) {
+// Define a function to display a ramen in the menu.
+
+function ramenMenuItem(ramen) {
     const ramenMenu = document.querySelector("#ramen-menu");
 
     const imgTag = document.createElement("img");
@@ -63,7 +86,7 @@ function createRamen(ramen) {
 
     ramenMenu.append(imgTag);
 
-    imgTag.addEventListener("click", event => {
+    imgTag.addEventListener("click", () => {
         // const detailImage = document.querySelector(".detail-image");
         // detailImage.src = ramen.image;
         // detailImage.alt = ramen.name;
@@ -81,9 +104,8 @@ function displayRamenDetails(ramen) {
     
     currentRamen = ramen;
 
-    const detailImage = document.querySelector(".detail-image");
-    detailImage.src = ramen.image;
-    detailImage.alt = ramen.name;
+    document.querySelector(".detail-image").src = ramen.image;
+    document.querySelector(".detail-image").alt = ramen.name;
 
     document.querySelector(".name").textContent = ramen.name;
     document.querySelector(".restaurant").textContent = ramen.restaurant;
@@ -93,6 +115,7 @@ function displayRamenDetails(ramen) {
     console.log(currentRamen);
 }
 
+// Form functionality to add a net-new ramen option.
 const form = document.querySelector("#new-ramen");
 
 form.addEventListener("submit", event => {
@@ -100,11 +123,11 @@ form.addEventListener("submit", event => {
 
     let newRamen = {};
 
-    const newRamenName = document.querySelector("#new-name").value;
-    const newRamenRestaurant = document.querySelector("#new-restaurant").value;
-    const newRamenImage = document.querySelector("#new-image").value;
-    const newRamenRating = document.querySelector("#new-rating").value;
-    const newRamenComment = document.querySelector("#new-comment").value;
+    const newRamenName = event.target.name.value;
+    const newRamenRestaurant = event.target.restaurant.value;
+    const newRamenImage = event.target.image.value;
+    const newRamenRating = event.target.rating.value;
+    const newRamenComment = event.target["new-comment"].value;
 
     newRamen = {
         name: newRamenName,
@@ -114,24 +137,13 @@ form.addEventListener("submit", event => {
         comment: newRamenComment
     };
     
-    createRamen(newRamen);
+    ramenMenuItem(newRamen);
     form.reset();
 
 })
 
-// ## Advanced Deliverable 2:
-// As a user, I would like to submit a form to update the rating and comment for a given ramen.
-// Steps:
-// 1. Add the edit form's HTML to the index.html file, below the new ramen form. <form id="edit-ramen">
-// 2. Add a submit event listener to the new form. Remember to prevent default!
-// 3. Define a variable named currentRamen. Inside displayDetails function, assign the ramen argument to currentRamen. This will allow us to save state for any given ramen.
-// 4. Assign the edit form's #new-rating input value to a new variable, updatedRating. 
-// 4. Assign the form's #new-comment value to a new variable, updatedComment.
-// 5. Update currentRamen's rating and comment properties using the new variables.
-
-const editForm = document.querySelector("#edit-ramen");
-
-editForm.addEventListener("submit", event => {
+// Form functionality allowing user to edit a ramen's rating and comment:
+document.querySelector("#edit-ramen").addEventListener("submit", event => {
     event.preventDefault();
 
     const updatedRating = document.querySelector("#updated-rating").value;
@@ -147,3 +159,7 @@ editForm.addEventListener("submit", event => {
     editForm.reset();
 
 })
+
+// document.querySelector("#remove-button").addEventListener("click", event => {
+
+// })

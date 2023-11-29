@@ -100,3 +100,7 @@ form h4 {
   color: white;
   background-color: black;
 }
+
+#remove-button {
+  margin: 1rem 0;
+}
