@@ -51,13 +51,22 @@
 // Delete a ramen (you can add a "delete" button if you'd like, or use an existing element to handle the delete action). The ramen should be removed from the `ramen-menu` div, and should not be displayed in the `ramen-detail` div. No need to persist.
 // STORY: As a user, I would like to remove a ramen from the list of ramens. After I remove a ramen, I would like to load the first item in the list of ramens.
 // 1. Start by adding a new #remove-ramen button to the ramen details with textContent "Remove".
-// 2. This new button will have a click eventListener that calls a remove() method on the currentRamen.
-// 
+// 2. This new button will have a click eventListener that calls a splice() method on the currentRamen.
+
+// ## Extra Advanced Deliverables:
+// As a user, I can:
+// - persist my updates to a ramen's rating and comment. (PATCH request)
+// - persist new ramens that I create (POST request)
+// - persist any ramen deletions (DELETE request)
+// Steps:
+// 1. Write a patch request in the #edit-ramen submit eventListener
+// 2. Write a post request in the #new-ramen form submit eventListener
+// 3. Write a delete request in the delete button eventListener
 
 // Define a variable currentRamen to save state.
 let currentRamen;
 
-// Define a ramenList variable to store all ramens locally.
+// Define a ramenList variable to store the list of ramens locally, this will allow us to remove them for Adv Deliverable 3.
 let ramenList;
 
 fetch("http://localhost:3000/ramens")
@@ -66,8 +75,11 @@ fetch("http://localhost:3000/ramens")
     
     ramenList = ramens;
 
+    console.log(ramenList);
+
     // Run a function to display details for ramens[0] -- the first ramen of the list.
-    displayRamenDetails(ramens[0]);
+    currentRamen = ramens[0];
+    displayRamenDetails(ramens[0]);    
     
     ramens.forEach(ramen => {
 
@@ -138,12 +150,24 @@ form.addEventListener("submit", event => {
     };
     
     ramenMenuItem(newRamen);
+    ramenList.push(newRamen);
+
+    fetch("http://localhost:3000/ramens", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(newRamen)
+    })
+
     form.reset();
 
 })
 
 // Form functionality allowing user to edit a ramen's rating and comment:
-document.querySelector("#edit-ramen").addEventListener("submit", event => {
+const editForm = document.querySelector("#edit-ramen");
+editForm.addEventListener("submit", event => {
     event.preventDefault();
 
     const updatedRating = document.querySelector("#updated-rating").value;
@@ -156,10 +180,45 @@ document.querySelector("#edit-ramen").addEventListener("submit", event => {
 
     displayRamenDetails(currentRamen);
 
+    fetch(`http://localhost:3000/ramens/${currentRamen.id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify({
+            rating: updatedRating,
+            comment: updatedComment
+        })
+    })
+
     editForm.reset();
 
 })
 
-// document.querySelector("#remove-button").addEventListener("click", event => {
+document.querySelector("#remove-button").addEventListener("click", () => {
+    const indexToRemove = ramenList.indexOf(currentRamen);
 
-// })
+    console.log(ramenList.indexOf(currentRamen));
+
+    ramenList.splice(indexToRemove, 1);
+
+    fetch(`http://localhost:3000/ramens/${currentRamen.id}`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
+    })
+
+    console.log(ramenList)
+    document.querySelector("#ramen-menu").innerHTML = "";
+
+    ramenList.forEach(ramen => {
+        ramenMenuItem(ramen);
+    })
+
+    displayRamenDetails(ramenList[0]);
+
+
+})
